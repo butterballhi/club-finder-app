@@ -2,13 +2,12 @@ import Utils from '../utils.js';
 import Clubs from '../data/local/clubs.js';
 
 const home = () => {
-  const searchFormElement = document.querySelector('#searchForm');
+  const searchFormElement = document.querySelector('search-bar');
 
   const clubListContainerElement = document.querySelector('#clubListContainer');
-  const clubQueryWaitingElement = clubListContainerElement.querySelector('.search-waiting');
+  const clubQueryWaitingElement = clubListContainerElement.querySelector('.query-waiting');
   const clubLoadingElement = clubListContainerElement.querySelector('.search-loading');
-  const clubListElement = clubListContainerElement.querySelector('.club-list');
-  const listElement = clubListElement.querySelector('.list');
+  const clubListElement = clubListContainerElement.querySelector('club-list');
 
   const showSportClub = (query) => {
     showLoading();
@@ -22,39 +21,20 @@ const home = () => {
   const onSearchHandler = (event) => {
     event.preventDefault();
 
-    const query = event.target.elements.name.value;
+    const { query } = event.detail;
     showSportClub(query);
-  }
-
-  const displayResult = (clubs) => {
-    const clubItems = clubs.map((club) => {
-      return `
-        <div class="card">
-          <img
-            class="fan-art-club"
-            src="${club.strTeamBadge}" 
-            alt="Fan Art: ${club.strTeam}"
-          >
-          <div class="club-info">
-            <div class="club-info__title">
-              <h2>${club.strTeam}</h2>
-            </div>
-            <div class="club-info__description">
-              <p>${club.strDescriptionEN}</p>
-            </div>
-          </div>
-        </div>
-      `;
-    });
-
-    listElement.innerHTML = clubItems.join('');
   };
 
-  const showLoading = () => {
-    Array.from(clubListContainerElement.children).forEach((element) => {
-      Utils.hideElement(element);
+  const displayResult = (clubs) => {
+    const clubItemElements = clubs.map((club) => {
+      const clubItemElement = document.createElement('club-item');
+      clubItemElement.club = club;
+
+      return clubItemElement;
     });
-    Utils.showElement(clubLoadingElement);
+
+    Utils.emptyElement(clubListElement);
+    clubListElement.append(...clubItemElements);
   };
 
   const showClubList = () => {
@@ -64,14 +44,21 @@ const home = () => {
     Utils.showElement(clubListElement);
   };
 
+  const showLoading = () => {
+    Array.from(clubListContainerElement.children).forEach((element) => {
+      Utils.hideElement(element);
+    });
+    Utils.showElement(clubLoadingElement);
+  };
+
   const showQueryWaiting = () => {
     Array.from(clubListContainerElement.children).forEach((element) => {
       Utils.hideElement(element);
     });
     Utils.showElement(clubQueryWaitingElement);
-  }
+  };
 
-  searchFormElement.addEventListener('submit', onSearchHandler);
+  searchFormElement.addEventListener('search', onSearchHandler);
   showQueryWaiting();
 };
 
